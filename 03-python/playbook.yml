@@ -1,0 +1,26 @@
+- hosts: terraform-ansible-python
+  vars:
+    project_path: "/home/ubuntu/django-project"
+  tasks:
+    - name: installing python and venv
+      apt:
+        pkg:
+        - python3
+        - virtualenv
+        update_cache: yes
+      become: yes
+    - name: installing dependencies with pip
+      pip:
+        virtualenv: "{{ project_path }}/venv"
+        name:
+          - django
+          - djangorestframework
+    - name: start django project
+      shell: '. "{{ project_path }}/venv/bin/activate"; django-admin startproject setup {{ project_path }}'
+      ignore_errors: yes
+    - name: alter settings host
+      lineinfile: 
+        path: "{{ project_path }}/setup/settings.py"
+        regexp: 'ALLOWED_HOSTS'
+        line: 'ALLOWED_HOSTS = ["*"]'
+        backrefs: yes
